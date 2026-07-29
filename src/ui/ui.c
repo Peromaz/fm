@@ -20,22 +20,27 @@ void draw_ui(){
 
     int window_width = COLS / 3;
     refresh(); 
-    prev_dir_win = create_new_window(LINES - 1, window_width,
-	    1, 0);
-    curr_dir_win = create_new_window(LINES - 1, window_width,
-	    1, window_width);
-    next_dir_win = create_new_window(LINES - 1, window_width,
-	    1, window_width * 2);
+    /* draw the panels */
+    draw_panel(prev_dir_win, LINES - 1, window_width, 1, 0, "PREVIOUS ");
+    draw_panel(curr_dir_win, LINES - 1, window_width, 1, window_width, "CURRENT ");
+    draw_panel(next_dir_win, LINES - 1, window_width, 1, window_width * 2, "NEXT ");
 }
-void erase_ui(){
-    endwin();
+void draw_panel(WINDOW *win, int height, int width, int y, int x, const char* panel_description ){
+    win = create_new_window(height, width, y, x);
+    mvwprintw(win, 1, 1, "%s", panel_description);
+    /* Adds line flush with rest of window */
+    mvwaddch(win, 2, 0, ACS_LTEE);
+    mvwhline(win, 2, 1, 0, width - 2);
+    mvwaddch(win, 2, width-1, ACS_RTEE); 
+    // draw
+    wrefresh(win);
 }
 WINDOW* create_new_window(int height, int width, int starty, int startx){
     WINDOW *local_window;
 
     local_window = newwin(height, width, starty, startx);
     box(local_window, 0, 0);
-    wrefresh(local_window);
+    //wrefresh(local_window);
     return local_window;
 }
 
@@ -45,4 +50,7 @@ void destroy_window(WINDOW *local_window){
     delwin(local_window);
 }
 
+void erase_ui(){
+    endwin();
+}
 
