@@ -1,25 +1,30 @@
 #include <ncurses.h>
-#include <string.h>
-
+/* My Libraries */
+#include "ui/ui.h"
 int main(){
-    initscr();			/* Start curses mode 		*/
-    start_color();			/* Start color functionality	*/
+    WINDOW *prev_dir_win;
+    WINDOW *curr_dir_win;
+    WINDOW *next_dir_win;
 
-    init_pair(1, COLOR_CYAN, COLOR_BLACK);
-    printw("A Big string which i didn't care to type fully ");
-    mvchgat(0, 0, -1, A_BLINK, 1, NULL);	
-    /* 
-     * First two parameters specify the position at which to start 
-     * Third parameter number of characters to update. -1 means till 
-     * end of line
-     * Forth parameter is the normal attribute you wanted to give 
-     * to the charcter
-     * Fifth is the color index. It is the index given during init_pair()
-     * use 0 if you didn't want color
-     * Sixth one is always NULL 
-     */
-    refresh();
-    getch();
-    endwin();			/* End curses mode		  */
+    int ch;
+    /* RULES */
+    initscr(); //Starting ncurses
+    cbreak(); //Disable line buffering
+    keypad(stdscr, TRUE); //Allows all keys
+    noecho();
+    printw("File path goes here");
+    mvprintw(0, COLS - 25,"LINES = %d COLS = %d", LINES, COLS); 
+    int window_width = COLS / 3;
+    refresh(); 
+    prev_dir_win = create_new_window(LINES - 1, window_width, 1, 0);
+    curr_dir_win = create_new_window(LINES - 1, window_width, 1, window_width);
+    next_dir_win = create_new_window(LINES - 1, window_width, 1, window_width * 2);
+    
+    while ((ch = getch()) != 'q'){
+
+    }
+    endwin();
     return 0;
 }
+
+
