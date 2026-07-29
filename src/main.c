@@ -4,16 +4,11 @@
 int main(){
     int ch;
     /* RULES */
-    initscr(); //Starting ncurses
-    cbreak(); //Disable line buffering
-    keypad(stdscr, TRUE); //Allows all keys
-    noecho();
-    
     draw_ui();
     while ((ch = getch()) != 'q'){
 
     }
-    endwin();
+    erase_ui();
     return 0;
 }
 
