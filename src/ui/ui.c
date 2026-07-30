@@ -1,6 +1,7 @@
 #include <ncurses.h>
 #include <unistd.h>
 #include "ui.h"
+#include "Menu/menu.h"
 
 /* Main three windows */
 WINDOW *prev_dir_win;
@@ -13,20 +14,29 @@ void draw_ui(){
     keypad(stdscr, TRUE); //Allows all keys
     noecho();
     
+    MENU* curr_dir_menu;
+    curr_dir_menu = create_menu(".");  // currently an issue
+    
     char cwd[4096];
     getcwd(cwd, sizeof(cwd));
     
     printw("Current working directory: %s\n", cwd);
 
     int window_width = COLS / 3;
-    refresh(); 
+    refresh();
     /* draw the panels */
-    draw_panel(prev_dir_win, LINES - 1, window_width, 1, 0, "PREVIOUS ");
-    draw_panel(curr_dir_win, LINES - 1, window_width, 1, window_width, "CURRENT ");
-    draw_panel(next_dir_win, LINES - 1, window_width, 1, window_width * 2, "NEXT ");
+    prev_dir_win = create_new_window(LINES -1, window_width, 1, 0);
+    draw_panel(prev_dir_win, window_width, "PREVIOUS");
+
+    curr_dir_win = create_new_window(LINES -1, window_width, 1, window_width);
+    draw_panel(curr_dir_win, window_width, "CURRENT");
+    wdraw_menu(curr_dir_win, curr_dir_menu, 0, 0, 0, 0); 
+    wrefresh(curr_dir_win);
+
+    next_dir_win = create_new_window(LINES - 1, window_width, 1, window_width * 2);
+    draw_panel(next_dir_win, window_width, "NEXT");
 }
-void draw_panel(WINDOW *win, int height, int width, int y, int x, const char* panel_description ){
-    win = create_new_window(height, width, y, x);
+void draw_panel(WINDOW *win, int width, const char* panel_description ){
     mvwprintw(win, 1, 1, "%s", panel_description);
     /* Adds line flush with rest of window */
     mvwaddch(win, 2, 0, ACS_LTEE);
