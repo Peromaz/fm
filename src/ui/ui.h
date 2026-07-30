@@ -2,7 +2,7 @@
 #define UI_H
 #include <ncurses.h> 
 
-
+void printcwd();
 void draw_panel(WINDOW*, int, const char*);
 void draw_ui();
 void erase_ui();

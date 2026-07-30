@@ -25,5 +25,5 @@ int get_dir_entry_count(DIR* dir_ptr);
 MENU *create_menu(const char* filepath);
 
 /* draws a given menu to a given window */
-void wdraw_menu(WINDOW* win, MENU *menu, int height, int width, int y, int x);
+void wdraw_menu(WINDOW* win, MENU *menu, int y, int x);
 #endif
