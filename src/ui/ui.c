@@ -1,5 +1,3 @@
-#include <ncurses.h>
-#include <unistd.h>
 #include "ui.h"
 
 void printcwd(){

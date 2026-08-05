@@ -6,6 +6,7 @@
 #include <dirent.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 /* This data structure represents one option in a menu */
 typedef struct _OPTION{
@@ -24,6 +25,8 @@ int get_dir_entry_count(DIR* dir_ptr);
 
 /* This actually creates the MENU data structure and stores the directory entries as options in the menu */
 MENU *create_menu(const char* filepath);
+void go_to_directory(const char* directory);
+char* get_next_directory(MENU *curr_menu);
 void menu_driver(WINDOW *win, MENU *menu, int ch);
 
 /* draws a given menu to a given window */

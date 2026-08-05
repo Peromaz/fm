@@ -1,6 +1,7 @@
 #ifndef UI_H
 #define UI_H
 #include <ncurses.h> 
+#include <unistd.h>
 
 void printcwd();
 void draw_panel(WINDOW*, int, const char*);
