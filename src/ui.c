@@ -1,9 +1,12 @@
-#include "ui.h"
+#include "include/ui.h"
 
 void printcwd(){
-    char cwd[4096];
+    char cwd[PATH_MAX];
     getcwd(cwd, sizeof(cwd));
-    printw("Current working directory: %s\n", cwd);
+    move(0,0);
+    clrtoeol();
+    printw("Current working directory: %s", cwd);
+    refresh();
 }
 void draw_panel(WINDOW *win, int width, const char* panel_description ){
     mvwprintw(win, 1, 1, "%s", panel_description);

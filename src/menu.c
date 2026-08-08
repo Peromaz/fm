@@ -1,4 +1,5 @@
-#include "menu.h"
+#include "include/menu.h"
+#include "include/statemachine.h"
 
 int get_dir_entry_count(DIR* dir_ptr){
     int count;
@@ -13,11 +14,11 @@ int get_dir_entry_count(DIR* dir_ptr){
 MENU *create_menu(const char* filepath){
     //Allocate memory for the menu
     MENU *menu = (MENU*) malloc(sizeof(MENU)); 
-    
+     
     struct dirent *dir_entry;
     DIR *dir_ptr;  
     dir_ptr = opendir(filepath);
-
+    
     //Check if the directory even exists, if so then display END OF DIRECTORY
     if (dir_ptr == NULL){
 	menu -> n_choices = 1;
@@ -64,16 +65,13 @@ MENU *create_menu(const char* filepath){
     return menu;
 }
 
-void go_to_directory(const char* directory){
-    /*if ((chdir(directory))){
+int go_to_directory(const char* directory){
+    if (chdir(directory) != 0){
+	perror("chdir failed");
 	return 0;
     }
-    else {
-        return 1;
-    }*/
-    chdir(directory);
+    return 1;
 }
-//issue here rn
 char* get_next_directory(MENU *curr_menu){
     char* prefix = "./";  
     char* filename = curr_menu -> options[curr_menu -> highlight_pos].description;
@@ -107,23 +105,27 @@ void wdraw_menu(WINDOW* win, MENU *menu, int y, int x, int highlight){
 
 void menu_driver(WINDOW *win, MENU *menu, int ch){
     switch(ch){
-	case 'h':
-	    go_to_directory("..");
+	case 'h': {
+	    change_state(ST_ASCENDING);
 	    break;
-	case 'j':
+	}
+	case 'j': {
 	    menu -> highlight_pos++;
 	    if ( menu -> highlight_pos > menu -> n_choices - 1 ){
 		menu -> highlight_pos = 0;	
 	    }
 	    break;
-	case 'k':
+	}
+	case 'k': {
 	    menu -> highlight_pos--;
 	    if ( menu -> highlight_pos < 0){
 		menu -> highlight_pos = menu -> n_choices - 1;	
 	    }
 	    break;
-	case 'l':
-	    go_to_directory(get_next_directory(menu));
+	}
+	case 'l': {
+	    change_state(ST_DESCENDING);
 	    break;
+	}
     }
 }

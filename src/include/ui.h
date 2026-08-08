@@ -2,6 +2,7 @@
 #define UI_H
 #include <ncurses.h> 
 #include <unistd.h>
+#include <limits.h>
 
 void printcwd();
 void draw_panel(WINDOW*, int, const char*);
