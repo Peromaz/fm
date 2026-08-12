@@ -26,6 +26,7 @@ int get_dir_entry_count(DIR* dir_ptr);
 
 /* This actually creates the MENU data structure and stores the directory entries as options in the menu */
 MENU *create_menu(const char* filepath);
+void free_menu(MENU* menu);
 int go_to_directory(const char* directory);
 char* get_next_directory(MENU *curr_menu);
 void menu_driver(WINDOW *win, MENU *menu, int ch);

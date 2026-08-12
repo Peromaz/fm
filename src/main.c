@@ -3,6 +3,7 @@
 #include "include/ui.h"
 #include "include/menu.h"
 #include "include/statemachine.h"
+
 #define TOPLINE 1 
 #define BOTTOMLINE 1
 
@@ -61,69 +62,89 @@ int main(int argc, char **argv){
 
     draw_panel(prev_dir_win, window_width, "PREVIOUS");
     wdraw_menu(prev_dir_win, prev_dir_menu, 3,1,false); 
-    //wrefresh(prev_dir_win);
 
     draw_panel(curr_dir_win, window_width, "CURRENT");
     wdraw_menu(curr_dir_win, curr_dir_menu, 3,1,true); 
-    //wrefresh(curr_dir_win);
 
     draw_panel(next_dir_win, window_width, "NEXT");
     wdraw_menu(next_dir_win, next_dir_menu, 3,1,false); 
-    //wrefresh(next_dir_win);
 
     int ch;
     while((ch = wgetch(curr_dir_win)) != 'q'){
 	/* Gets menu input */
 	menu_driver(curr_dir_win, curr_dir_menu, ch);
-	/* prints current working directory at the top */
-	
 	STATE curr_state = get_current_state();
 	switch (curr_state){
 	    case ST_ASCENDING: {
-		/* Free up space for the current directory menu and resassign */
-		free(curr_dir_menu -> options);
-		free(curr_dir_menu);
-			
+		free_menu(curr_dir_menu);
 		go_to_directory("..");
 		curr_dir_menu = create_menu(".");
+		
+		free_menu(prev_dir_menu);
+		prev_dir_menu = create_menu("..");
+
+		free_menu(next_dir_menu);
+		char* next_dir = get_next_directory(curr_dir_menu);
+		if (next_dir){
+		    next_dir_menu = create_menu(next_dir);
+		    free(next_dir);
+		    next_dir = NULL;
+		}
 		change_state(ST_BROWSING);
-		printcwd();
 		break;
 	    }
 	    case ST_DESCENDING: {
 		char* next_dir = get_next_directory(curr_dir_menu);
 		if(next_dir){
 		/* Free up space for the current directory menu and reassign */
-		    free(curr_dir_menu -> options);
-		    free(curr_dir_menu);
+		    free_menu(curr_dir_menu);
 		    go_to_directory(next_dir);
 		    curr_dir_menu = create_menu(".");
 		    free(next_dir);
 		    next_dir = NULL;
 		}
+		free_menu(prev_dir_menu);
+		prev_dir_menu = create_menu("..");
+
+		free_menu(next_dir_menu);
+		next_dir = get_next_directory(curr_dir_menu);
+		if (next_dir){
+		    next_dir_menu = create_menu(next_dir);
+		    free(next_dir);
+		    next_dir = NULL;
+		}
 		change_state(ST_BROWSING);
-		printcwd();
 		break;		
 	    }
 	    case ST_BROWSING: {
+		free_menu(next_dir_menu);
+
 		char* next_dir = get_next_directory(curr_dir_menu);
+		if (next_dir){
+		    next_dir_menu = create_menu(next_dir);
+		    free(next_dir);
+		    next_dir = NULL;
+		}
+		
 		if (DEBUG){
+		    char* next_dir = get_next_directory(curr_dir_menu);
 		    move(LINES - 1, 0);
 		    clrtoeol();
 		    printw("%s", next_dir);
+		    free(next_dir);
+		    next_dir = NULL;
 		}
-		free(next_dir);
-		next_dir = NULL;
-		printcwd();
 	    }
 	    default: break;
 	}
-	
+	printcwd();
+
 	if (DEBUG){
+
 	    wclear(prev_dir_win);
 	    prev_dir_win = create_new_window(LINES - TOPLINE - BOTTOMLINE, window_width,
 		1, 0); 
-	    draw_panel(prev_dir_win, window_width, "PREVIOUS");
+	    draw_panel(prev_dir_win, window_width, "PREVIOUS PREVIEW");
 	    wdraw_menu(prev_dir_win, prev_dir_menu, 3,1,false); 
 
 	    /* draw the current window */
@@ -137,7 +158,7 @@ int main(int argc, char **argv){
 	    wclear(next_dir_win);
 	    next_dir_win = create_new_window(LINES - TOPLINE - BOTTOMLINE, window_width,
 		1, window_width * 2); 
-	    draw_panel(next_dir_win, window_width, "NEXT");
+	    draw_panel(next_dir_win, window_width, "NEXT PREVIEW");
 	    wdraw_menu(next_dir_win, next_dir_menu, 3,1,false); 
 	}
 	else{

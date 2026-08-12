@@ -18,7 +18,6 @@ MENU *create_menu(const char* filepath){
     struct dirent *dir_entry;
     DIR *dir_ptr;  
     dir_ptr = opendir(filepath);
-    
     //Check if the directory even exists, if so then display END OF DIRECTORY
     if (dir_ptr == NULL){
 	menu -> n_choices = 1;
@@ -51,10 +50,18 @@ MENU *create_menu(const char* filepath){
 	/* Filter out .. and . */
 	if (strcmp(dir_description, ".") == 0  || strcmp(dir_description, "..") == 0){
 	    menu -> n_choices -= 1;
-	    //free(dir_description);
 	    free(entry);
 	    continue;
 	}
+	if (ST_SHOWING_DOTFILES && dir_description[0] == '.'){
+	    menu -> n_choices -= 1;
+	    free(entry);
+	    continue;
+	}		
+
+	if (dir_entry -> d_type == DT_DIR)	
+	    strcat(dir_description, "/");
+
 	strcpy(entry -> description, dir_description);
 	menu -> options[index] = *entry;
 	//free(dir_description);
@@ -65,9 +72,15 @@ MENU *create_menu(const char* filepath){
     return menu;
 }
 
+void free_menu(MENU* menu){
+    free(menu -> options);
+    free(menu);
+}
+
 int go_to_directory(const char* directory){
     if (chdir(directory) != 0){
-	perror("chdir failed");
+	move(0, COLS - 30);
+	printw("NOT A DIRECTORY, CAN'T DESCEND");
 	return 0;
     }
     return 1;
