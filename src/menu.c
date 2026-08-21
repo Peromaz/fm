@@ -101,16 +101,31 @@ char* get_next_directory(MENU *curr_menu){
     return result;
     //caller has to free
 }
-void wdraw_menu(WINDOW* win, MENU *menu, int y, int x, int highlight){
+void wdraw_menu(WINDOW* win, MENU *menu, int y, int x, int highlight, int total_menu_rows){
     int i;
-    for(i = 0; i < (menu -> n_choices); ++i){
-	if (menu -> highlight_pos == i && highlight){
+    int offset = 0; // amount of offset for when menu choices exceed available screen space
+    int drawcount;
+
+    /* Determine the drawcount, or number of options I can show at once */
+    if ((menu -> n_choices) < total_menu_rows){
+	drawcount = menu -> n_choices;
+    }
+    else {
+	drawcount = total_menu_rows;
+    }
+
+    if (menu -> highlight_pos >= drawcount){
+	offset = menu -> highlight_pos;
+    }
+
+    for(i = 0; i < drawcount; ++i){
+	if (menu -> highlight_pos == (i + offset) && highlight){
 	    wattron(win, A_REVERSE);
-	    mvwprintw(win, y + i, x, "%s", menu -> options[i].description);
+	    mvwprintw(win, y + i, x, "%s", menu -> options[i + offset].description);
 	    wattroff(win, A_REVERSE);
 	}
 	else{
-	    mvwprintw(win, y + i, x, "%s", menu -> options[i].description);
+	    mvwprintw(win, y + i, x, "%s", menu -> options[i + offset].description);
 	}
     }
     wrefresh(win);

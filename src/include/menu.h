@@ -32,5 +32,5 @@ char* get_next_directory(MENU *curr_menu);
 void menu_driver(WINDOW *win, MENU *menu, int ch);
 
 /* draws a given menu to a given window */
-void wdraw_menu(WINDOW* win, MENU *menu, int y, int x, int highlight);
+void wdraw_menu(WINDOW* win, MENU *menu, int y, int x, int highlight, int total_menu_rows);
 #endif
