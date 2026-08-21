@@ -1,11 +1,11 @@
 #include <ncurses.h>
-/* My Libraries */
 #include "include/ui.h"
 #include "include/menu.h"
 #include "include/statemachine.h"
 
 #define TOPLINE 1 
 #define BOTTOMLINE 1
+#define LINE 1 
 
 WINDOW* prev_dir_win;
 MENU* prev_dir_menu;
@@ -17,6 +17,9 @@ WINDOW* next_dir_win;
 MENU* next_dir_menu;
 
 int DEBUG;
+/* Declarations */
+void init_windows(int window_width);
+void init_menus();
 
 int main(int argc, char **argv){
     /* parse debug arg */
@@ -40,21 +43,11 @@ int main(int argc, char **argv){
     noecho();
     curs_set(0); //sets the cursor to invisible, small chance it may crash the program if terminal doesn't support it
     int window_width = COLS / 3;
+    int total_menu_rows = LINES - (4 * LINE);
+    int total_window_cols = window_width - 2;
     
-    if (DEBUG){
-	prev_dir_win = create_new_window(LINES - TOPLINE - BOTTOMLINE , window_width, 1, 0);
-	curr_dir_win = create_new_window(LINES - TOPLINE - BOTTOMLINE, window_width, 1, window_width);
-	next_dir_win = create_new_window(LINES - TOPLINE - BOTTOMLINE, window_width, 1, window_width * 2); 
-    }
-    else{
-	prev_dir_win = create_new_window(LINES - TOPLINE, window_width, 1, 0);
-	curr_dir_win = create_new_window(LINES - TOPLINE, window_width, 1, window_width);
-	next_dir_win = create_new_window(LINES - TOPLINE, window_width, 1, window_width * 2); 
-    }
-
-    prev_dir_menu = create_menu("..");
-    curr_dir_menu = create_menu(".");
-    next_dir_menu = create_menu(get_next_directory(curr_dir_menu));
+    init_windows(window_width);
+    init_menus();
 
     /* Draw static and intial UI components */ 
     printcwd(); 
@@ -76,43 +69,49 @@ int main(int argc, char **argv){
 	STATE curr_state = get_current_state();
 	switch (curr_state){
 	    case ST_ASCENDING: {
-		free_menu(curr_dir_menu);
-		go_to_directory("..");
-		curr_dir_menu = create_menu(".");
-		
 		free_menu(prev_dir_menu);
-		prev_dir_menu = create_menu("..");
-
+		free_menu(curr_dir_menu);
 		free_menu(next_dir_menu);
+
+		go_to_directory("..");
+		// Create the new current menu	
+		curr_dir_menu = create_menu(".");
+		// create the new previous menu
+		prev_dir_menu = create_menu("..");
+		//create the new next menu
 		char* next_dir = get_next_directory(curr_dir_menu);
 		if (next_dir){
 		    next_dir_menu = create_menu(next_dir);
-		    free(next_dir);
-		    next_dir = NULL;
 		}
+		free(next_dir);
+		next_dir = NULL;
+
 		change_state(ST_BROWSING);
 		break;
 	    }
 	    case ST_DESCENDING: {
+		free_menu(prev_dir_menu);
+		free_menu(next_dir_menu);
+		// Create the new current menu	
 		char* next_dir = get_next_directory(curr_dir_menu);
 		if(next_dir){
 		/* Free up space for the current directory menu and reassign */
-		    free_menu(curr_dir_menu);
 		    go_to_directory(next_dir);
+		    free_menu(curr_dir_menu);
 		    curr_dir_menu = create_menu(".");
-		    free(next_dir);
-		    next_dir = NULL;
 		}
-		free_menu(prev_dir_menu);
+		free(next_dir);
+		next_dir = NULL;
+		//Create previous menu 
 		prev_dir_menu = create_menu("..");
 
-		free_menu(next_dir_menu);
 		next_dir = get_next_directory(curr_dir_menu);
 		if (next_dir){
 		    next_dir_menu = create_menu(next_dir);
-		    free(next_dir);
-		    next_dir = NULL;
 		}
+		free(next_dir);
+		next_dir = NULL;
+
 		change_state(ST_BROWSING);
 		break;		
 	    }
@@ -122,10 +121,10 @@ int main(int argc, char **argv){
 		char* next_dir = get_next_directory(curr_dir_menu);
 		if (next_dir){
 		    next_dir_menu = create_menu(next_dir);
-		    free(next_dir);
-		    next_dir = NULL;
 		}
-		
+		free(next_dir);
+		next_dir = NULL;
+
 		if (DEBUG){
 		    char* next_dir = get_next_directory(curr_dir_menu);
 		    move(LINES - 1, 0);
@@ -163,6 +162,7 @@ int main(int argc, char **argv){
 	}
 	else{
 	    wclear(prev_dir_win);
+	    destroy_window(prev_dir_win);
 	    prev_dir_win = create_new_window(LINES - TOPLINE, window_width,
 		1, 0); 
 	    draw_panel(prev_dir_win, window_width, "PREVIOUS");
@@ -170,6 +170,7 @@ int main(int argc, char **argv){
 
 	    /* draw the current window */
 	    wclear(curr_dir_win);
+	    destroy_window(curr_dir_win);
 	    curr_dir_win = create_new_window(LINES - TOPLINE, window_width,
 		1, window_width);
 	    draw_panel(curr_dir_win, window_width, "CURRENT");
@@ -177,6 +178,7 @@ int main(int argc, char **argv){
 	    
 	    /* draw the next window */
 	    wclear(next_dir_win);
+	    destroy_window(next_dir_win);
 	    next_dir_win = create_new_window(LINES - TOPLINE, window_width,
 		1, window_width * 2); 
 	    draw_panel(next_dir_win, window_width, "NEXT");
@@ -189,4 +191,20 @@ int main(int argc, char **argv){
     return 0;
 }
 
-
+void init_windows(int window_width){
+    if (DEBUG){
+	prev_dir_win = create_new_window(LINES - TOPLINE - BOTTOMLINE , window_width, 1, 0);
+	curr_dir_win = create_new_window(LINES - TOPLINE - BOTTOMLINE, window_width, 1, window_width);
+	next_dir_win = create_new_window(LINES - TOPLINE - BOTTOMLINE, window_width, 1, window_width * 2); 
+    }
+    else{
+	prev_dir_win = create_new_window(LINES - TOPLINE, window_width, 1, 0);
+	curr_dir_win = create_new_window(LINES - TOPLINE, window_width, 1, window_width);
+	next_dir_win = create_new_window(LINES - TOPLINE, window_width, 1, window_width * 2); 
+    }
+}
+void init_menus(){
+    prev_dir_menu = create_menu("..");
+    curr_dir_menu = create_menu(".");
+    next_dir_menu = create_menu(get_next_directory(curr_dir_menu));
+}

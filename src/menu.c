@@ -123,6 +123,7 @@ void menu_driver(WINDOW *win, MENU *menu, int ch){
 	    break;
 	}
 	case 'j': {
+	    change_state(ST_BROWSING);
 	    menu -> highlight_pos++;
 	    if ( menu -> highlight_pos > menu -> n_choices - 1 ){
 		menu -> highlight_pos = 0;	
@@ -130,6 +131,7 @@ void menu_driver(WINDOW *win, MENU *menu, int ch){
 	    break;
 	}
 	case 'k': {
+	    change_state(ST_BROWSING);
 	    menu -> highlight_pos--;
 	    if ( menu -> highlight_pos < 0){
 		menu -> highlight_pos = menu -> n_choices - 1;	
