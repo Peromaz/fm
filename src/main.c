@@ -26,9 +26,11 @@ WINDOW* next_dir_win;
 MENU* next_dir_menu;
 /* Boolean Debug mode controller */
 int DEBUG;
+int total_menu_rows; 
 /* Declarations to make main() less verbose */
 void init_windows(int window_width);
 void init_menus();
+int get_page_count(MENU* menu, int page_size);
 
 int main(int argc, char **argv){
     /* Parse for command line arguments */
@@ -54,8 +56,9 @@ int main(int argc, char **argv){
     
     /* Calculate the width of each section, the total rows available for the menu, and total columns availble for the menu. */
     int window_width = COLS / 3;
-    int total_menu_rows = LINES - (5 * LINE);
+    total_menu_rows = LINES - (5 * LINE);
     int total_window_cols = window_width - 2;
+    int menu_pages;
     
     /* Intialize UI components (windows and menus) */
     init_windows(window_width);
@@ -113,7 +116,7 @@ int main(int argc, char **argv){
 
 		free(next_dir);
 		next_dir = NULL;
-
+		
 		change_state(ST_BROWSING);
 		break;
 	    }
@@ -276,7 +279,6 @@ int main(int argc, char **argv){
     erase_ui();
     return 0;
 }
-
 void init_windows(int window_width){
     if (DEBUG){
 	prev_dir_win = create_new_window(LINES - TOPLINE - BOTTOMLINE , window_width, 1, 0);

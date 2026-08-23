@@ -18,7 +18,9 @@ typedef struct _OPTION{
 typedef struct _MENU{
     OPTION *options;
     int highlight_pos;
+    int page_pos;
     int n_choices;
+    int n_pages;
 }MENU;
 
 /* For the dirent library, this counts the amount of entries ina directory stream */

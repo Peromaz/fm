@@ -1,6 +1,8 @@
 #include "include/menu.h"
 #include "include/statemachine.h"
 
+extern int total_menu_rows;
+
 int get_dir_entry_count(DIR* dir_ptr){
     int count;
     struct dirent *dummy;
@@ -10,7 +12,9 @@ int get_dir_entry_count(DIR* dir_ptr){
     rewinddir(dir_ptr);
     return count;
 }
-
+int get_page_count(MENU *menu){
+    return (menu -> n_choices + total_menu_rows - 1) / total_menu_rows;
+}
 MENU *create_menu(const char* filepath){
     //Allocate memory for the menu
     MENU *menu = (MENU*) malloc(sizeof(MENU)); 
@@ -23,6 +27,8 @@ MENU *create_menu(const char* filepath){
 	menu -> n_choices = 1;
 	menu -> options = (OPTION*) malloc(sizeof(OPTION));
 	menu -> highlight_pos = 0;
+	menu -> page_pos = 0;
+	menu -> n_pages = 0; 	
 	if(menu -> options == NULL){
 	    perror("options malloc failed");
 	    exit(1);
@@ -37,6 +43,7 @@ MENU *create_menu(const char* filepath){
     menu -> options = (OPTION*) malloc(sizeof(OPTION)
 	    * (menu -> n_choices)); 
     menu -> highlight_pos = 0;
+    menu -> page_pos = 0;
     if(menu -> options == NULL){
 	perror("options malloc failed");
 	exit(1);
@@ -64,7 +71,6 @@ MENU *create_menu(const char* filepath){
 
 	strcpy(entry -> description, dir_description);
 	menu -> options[index] = *entry;
-	//free(dir_description);
 	free(entry);
 	++index;
     }
@@ -102,30 +108,28 @@ char* get_next_directory(MENU *curr_menu){
     //caller has to free
 }
 void wdraw_menu(WINDOW* win, MENU *menu, int y, int x, int highlight, int total_menu_rows){
-    int i;
-    int offset = 0; // amount of offset for when menu choices exceed available screen space
-    int drawcount;
+    int selected = menu -> highlight_pos;
+    int total = menu -> n_choices;
+    int offset = (selected / total_menu_rows) * total_menu_rows;
 
     /* Determine the drawcount, or number of options I can show at once */
-    if ((menu -> n_choices) < total_menu_rows){
-	drawcount = menu -> n_choices;
+    int drawcount;
+    if (total - offset < total_menu_rows){
+	drawcount = total - offset;
     }
     else {
 	drawcount = total_menu_rows;
     }
 
-    if (menu -> highlight_pos >= drawcount){
-	offset = menu -> highlight_pos;
-    }
-
-    for(i = 0; i < drawcount; ++i){
-	if (menu -> highlight_pos == (i + offset) && highlight){
+    int row;
+    for(row = 0; row < drawcount; ++row){
+	if (menu -> highlight_pos == (row + offset) && highlight){
 	    wattron(win, A_REVERSE);
-	    mvwprintw(win, y + i, x, "%s", menu -> options[i + offset].description);
+	    mvwprintw(win, y + row, x, "%s", menu -> options[row + offset].description);
 	    wattroff(win, A_REVERSE);
 	}
 	else{
-	    mvwprintw(win, y + i, x, "%s", menu -> options[i + offset].description);
+	    mvwprintw(win, y + row, x, "%s", menu -> options[row + offset].description);
 	}
     }
     wrefresh(win);
