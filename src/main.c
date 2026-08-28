@@ -27,10 +27,11 @@ MENU* next_dir_menu;
 /* Boolean Debug mode controller */
 int DEBUG;
 int total_menu_rows; 
+int dotfiles = 0;
 /* Declarations to make main() less verbose */
 void init_windows(int window_width);
 void init_menus();
-int get_page_count(MENU* menu, int page_size);
+void reload_page();
 
 int main(int argc, char **argv){
     /* Parse for command line arguments */
@@ -103,15 +104,15 @@ int main(int argc, char **argv){
 		go_to_directory("..");
 
 		/* Create the new Current menu */
-		curr_dir_menu = create_menu(".");
+		curr_dir_menu = create_menu(".", dotfiles);
 		/* Create the new Previous menu */
-		prev_dir_menu = create_menu("..");
+		prev_dir_menu = create_menu("..", dotfiles);
 		/* Create the new Next menu */
 		
 		/* Find next directory */
 		char* next_dir = get_next_directory(curr_dir_menu);
 		if (next_dir){
-		    next_dir_menu = create_menu(next_dir);
+		    next_dir_menu = create_menu(next_dir, dotfiles);
 		}
 
 		free(next_dir);
@@ -130,19 +131,19 @@ int main(int argc, char **argv){
 		    /* Replace current directory with new */
 		    go_to_directory(next_dir);
 		    free_menu(curr_dir_menu);
-		    curr_dir_menu = create_menu(".");
+		    curr_dir_menu = create_menu(".", dotfiles);
 		}
 
 		free(next_dir);
 		next_dir = NULL;
 
 		/* Create the new Previous menu */
-		prev_dir_menu = create_menu("..");
+		prev_dir_menu = create_menu("..", dotfiles);
 
 		/* Create the new Next menu */
 		next_dir = get_next_directory(curr_dir_menu);
 		if (next_dir){
-		    next_dir_menu = create_menu(next_dir);
+		    next_dir_menu = create_menu(next_dir, dotfiles);
 		}
 
 		free(next_dir);
@@ -156,7 +157,7 @@ int main(int argc, char **argv){
 
 		char* next_dir = get_next_directory(curr_dir_menu);
 		if (next_dir){
-		    next_dir_menu = create_menu(next_dir);
+		    next_dir_menu = create_menu(next_dir, dotfiles);
 		}
 
 		free(next_dir);
@@ -170,6 +171,15 @@ int main(int argc, char **argv){
 		    free(next_dir);
 		    next_dir = NULL;
 		}
+	    }
+	    case ST_SHOWING_DOTFILES: {
+		if(dotfiles == false)
+		    dotfiles = true;
+		else
+		    dotfiles = false;
+		reload_page();	
+		change_state(ST_BROWSING);
+		break;
 	    }
 	    default: break;
 	}
@@ -279,6 +289,26 @@ int main(int argc, char **argv){
     erase_ui();
     return 0;
 }
+void reload_page(){
+    free_menu(prev_dir_menu);
+    free_menu(curr_dir_menu);
+    free_menu(next_dir_menu);
+
+    /* Create the new Current menu */
+    curr_dir_menu = create_menu(".", dotfiles);
+    /* Create the new Previous menu */
+    prev_dir_menu = create_menu("..", dotfiles);
+    /* Create the new Next menu */
+    
+    /* Find next directory */
+    char* next_dir = get_next_directory(curr_dir_menu);
+    if (next_dir){
+	next_dir_menu = create_menu(next_dir, dotfiles);
+    }
+
+    free(next_dir);
+    next_dir = NULL;
+}
 void init_windows(int window_width){
     if (DEBUG){
 	prev_dir_win = create_new_window(LINES - TOPLINE - BOTTOMLINE , window_width, 1, 0);
@@ -292,7 +322,7 @@ void init_windows(int window_width){
     }
 }
 void init_menus(){
-    prev_dir_menu = create_menu("..");
-    curr_dir_menu = create_menu(".");
-    next_dir_menu = create_menu(get_next_directory(curr_dir_menu));
+    prev_dir_menu = create_menu("..", false);
+    curr_dir_menu = create_menu(".", false);
+    next_dir_menu = create_menu(get_next_directory(curr_dir_menu), false);
 }

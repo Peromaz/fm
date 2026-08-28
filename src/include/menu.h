@@ -18,7 +18,6 @@ typedef struct _OPTION{
 typedef struct _MENU{
     OPTION *options;
     int highlight_pos;
-    int page_pos;
     int n_choices;
     int n_pages;
 }MENU;
@@ -27,7 +26,7 @@ typedef struct _MENU{
 int get_dir_entry_count(DIR* dir_ptr);
 
 /* This actually creates the MENU data structure and stores the directory entries as options in the menu */
-MENU *create_menu(const char* filepath);
+MENU *create_menu(const char* filepath, int dotfiles);
 void free_menu(MENU* menu);
 int go_to_directory(const char* directory);
 char* get_next_directory(MENU *curr_menu);

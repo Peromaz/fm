@@ -15,7 +15,7 @@ int get_dir_entry_count(DIR* dir_ptr){
 int get_page_count(MENU *menu){
     return (menu -> n_choices + total_menu_rows - 1) / total_menu_rows;
 }
-MENU *create_menu(const char* filepath){
+MENU *create_menu(const char* filepath, int dotfiles){
     //Allocate memory for the menu
     MENU *menu = (MENU*) malloc(sizeof(MENU)); 
      
@@ -27,7 +27,6 @@ MENU *create_menu(const char* filepath){
 	menu -> n_choices = 1;
 	menu -> options = (OPTION*) malloc(sizeof(OPTION));
 	menu -> highlight_pos = 0;
-	menu -> page_pos = 0;
 	menu -> n_pages = 0; 	
 	if(menu -> options == NULL){
 	    perror("options malloc failed");
@@ -43,7 +42,6 @@ MENU *create_menu(const char* filepath){
     menu -> options = (OPTION*) malloc(sizeof(OPTION)
 	    * (menu -> n_choices)); 
     menu -> highlight_pos = 0;
-    menu -> page_pos = 0;
     if(menu -> options == NULL){
 	perror("options malloc failed");
 	exit(1);
@@ -60,11 +58,12 @@ MENU *create_menu(const char* filepath){
 	    free(entry);
 	    continue;
 	}
-	if (ST_SHOWING_DOTFILES && dir_description[0] == '.'){
+	
+	if (dotfiles == 0 && dir_description[0] == '.'){
 	    menu -> n_choices -= 1;
 	    free(entry);
 	    continue;
-	}		
+	}
 
 	if (dir_entry -> d_type == DT_DIR)	
 	    strcat(dir_description, "/");
@@ -160,6 +159,10 @@ void menu_driver(WINDOW *win, MENU *menu, int ch){
 	case 'l': {
 	    change_state(ST_DESCENDING);
 	    break;
+	}
+	case '.': {
+	    change_state(ST_SHOWING_DOTFILES);
+	    break; 
 	}
     }
 }
