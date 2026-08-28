@@ -171,6 +171,7 @@ int main(int argc, char **argv){
 		    free(next_dir);
 		    next_dir = NULL;
 		}
+		break;
 	    }
 	    case ST_SHOWING_DOTFILES: {
 		if(dotfiles == false)
