@@ -1,3 +1,5 @@
+#ifndef STATEMACHINE_H
+#define STATEMACHINE_H
 typedef enum {
     ST_BROWSING,
     ST_ASCENDING,
@@ -9,3 +11,4 @@ typedef enum {
 
 void change_state(STATE state);
 STATE get_current_state();
+#endif
