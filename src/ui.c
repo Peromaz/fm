@@ -1,6 +1,7 @@
 #include "ui.h"
 #include <linux/limits.h>
 #include <dirent.h>
+
 void printcwd(){
 	char cwd[PATH_MAX];
 	getcwd(cwd, sizeof(cwd));
@@ -9,6 +10,7 @@ void printcwd(){
 	printw("Current working directory: %s", cwd);
 	refresh();
 }
+
 void draw_panel(WINDOW *win, int width, const char *panel_description ){
 	mvwprintw(win, 1, 1, "%s", panel_description);
 	/* Adds line flush with rest of window */
@@ -18,9 +20,9 @@ void draw_panel(WINDOW *win, int width, const char *panel_description ){
 	// draw
 	wrefresh(win);
 }
+
 WINDOW *create_new_window(int height, int width, int starty, int startx){
 	WINDOW *local_window;
-
 	local_window = newwin(height, width, starty, startx);
 	box(local_window, 0, 0);
 	return local_window;

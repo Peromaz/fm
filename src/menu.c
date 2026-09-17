@@ -5,7 +5,7 @@
 extern int total_menu_rows;
 
 int get_dir_entry_count(DIR *dir_ptr){
-	int count;
+	int count = 0;
 	struct dirent *dummy;
 	while((dummy = readdir(dir_ptr))){
 		++count;	
@@ -72,8 +72,6 @@ MENU *create_menu(const char *filepath, int dotfiles){
 			free(entry);
 			continue;
 		}
-		if (is_directory(dir_description))	
-			strcat(dir_description, "/");
 
 		strcpy(entry->description, dir_description);
 		menu->options[index] = *entry;
@@ -103,7 +101,7 @@ char *get_next_directory(MENU *curr_menu){
 	size_t p_length = strlen(prefix);
 	size_t f_length = strlen(filename);
 
-	char *result = malloc(p_length + f_length + 1);
+	char *result = (char *) malloc(p_length + f_length + 1);
 
 	if (!result) return NULL;
 

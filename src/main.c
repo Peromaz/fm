@@ -16,14 +16,14 @@
 #define BOTTOMLINE 1
 #define LINE 1 
 /* Intializing the Previous, Current and Next Windows and Menus */
-WINDOW *prev_dir_win;
-MENU *prev_dir_menu;
+static WINDOW *prev_dir_win;
+static MENU *prev_dir_menu;
 
-WINDOW *curr_dir_win;
-MENU *curr_dir_menu;
+static WINDOW *curr_dir_win;
+static MENU *curr_dir_menu;
 
-WINDOW *next_dir_win;
-MENU *next_dir_menu;
+static WINDOW *next_dir_win;
+static MENU *next_dir_menu;
 /* Boolean Debug mode controller */
 int DEBUG;
 int total_menu_rows; 
@@ -36,7 +36,7 @@ void reload_page();
 int main(int argc, char **argv){
 	/* Parse for command line arguments */
 	if (argc == 2){
-	char *debug_string = strstr(argv[1], "--debug");
+		char *debug_string = strstr(argv[1], "--debug");
 		if (debug_string != NULL){
 			DEBUG = true;
 		}
@@ -64,7 +64,7 @@ int main(int argc, char **argv){
 	init_menus();
 	printcwd(); 
 	refresh(); 
-
+	/* Drawing the intial panels */
 	draw_panel(prev_dir_win, window_width, "PREVIOUS");
 	wdraw_menu(prev_dir_win, prev_dir_menu, 3, 1, false, total_menu_rows); 
 
